@@ -5,7 +5,14 @@ using UnityEngine.TextCore.Text;
 
 public class PlayerMove : MonoBehaviour
 {
+    [Header("移動速度")]
     [SerializeField] private float moveSpeed = 3.0f;
+    [SerializeField] private float keyMoveSpeed = 4.0f;  // キー押されている時のスピード
+
+    [Header("ジャンプ力")]
+    [SerializeField] private float jumpPower = 5.0f;
+    [SerializeField] private float jumpGravity = 15.0f;
+    [SerializeField] private float fallPower = 25.0f;
 
     [SerializeField] private Transform player;
 
@@ -16,6 +23,10 @@ public class PlayerMove : MonoBehaviour
 
     Vector3 moveDirection;
 
+    float f_currentSpeed;
+
+    bool b_jump;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -25,6 +36,7 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // 最後に押したキーの方向を保存
         if (Keyboard.current.wKey.wasPressedThisFrame)
         {
             moveDirection = Vector3.forward;
@@ -45,6 +57,7 @@ public class PlayerMove : MonoBehaviour
             moveDirection = Vector3.left;
         }
 
+
         // キャラクターを移動方向に向かせる
         if (moveDirection != Vector3.zero)
         {
@@ -52,10 +65,49 @@ public class PlayerMove : MonoBehaviour
             player.Rotate(0, playerAngleOffset, 0);
         }
 
-        // 移動
-        rb.MovePosition(
-            rb.position + moveDirection * moveSpeed * Time.deltaTime
-        );
 
+        // 移動キーを押している間は速度を変更
+        if (Keyboard.current.wKey.isPressed ||
+            Keyboard.current.sKey.isPressed ||
+            Keyboard.current.dKey.isPressed ||
+            Keyboard.current.aKey.isPressed)
+        {
+            f_currentSpeed = keyMoveSpeed;
+        }
+        else
+        {
+            f_currentSpeed = moveSpeed;
+        }
+
+
+        // ジャンプ入力
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+            b_jump = true;
+    }
+
+    void FixedUpdate()
+    {
+        // 移動
+        rb.MovePosition(rb.position + moveDirection * f_currentSpeed * Time.fixedDeltaTime);
+
+        // ジャンプ
+        if (b_jump)
+        {
+            rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+
+            b_jump = false;
+        }
+
+        // 上昇中
+        if (rb.linearVelocity.y > 0)
+        {
+            rb.AddForce(Vector3.down * jumpGravity, ForceMode.Acceleration);
+        }
+
+        // 落下中
+        if (rb.linearVelocity.y < 0)
+        {
+            rb.AddForce(Vector3.down * fallPower, ForceMode.Acceleration);
+        }
     }
 }
