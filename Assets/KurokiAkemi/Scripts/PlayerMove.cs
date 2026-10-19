@@ -11,6 +11,7 @@ public class PlayerMove : MonoBehaviour
 
     [Header("ジャンプ力")]
     [SerializeField] private float jumpPower = 5.0f;
+    [SerializeField] private float smallJumpPower = 2.5f;
     [SerializeField] private float jumpGravity = 15.0f;
     [SerializeField] private float fallPower = 25.0f;
 
@@ -26,6 +27,7 @@ public class PlayerMove : MonoBehaviour
     float f_currentSpeed;
 
     bool b_jump;
+    bool b_smallJump;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -83,6 +85,10 @@ public class PlayerMove : MonoBehaviour
         // ジャンプ入力
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
             b_jump = true;
+
+        // 小ジャンプ
+        if (Keyboard.current.jKey.wasPressedThisFrame)
+            b_smallJump = true;
     }
 
     void FixedUpdate()
@@ -96,6 +102,14 @@ public class PlayerMove : MonoBehaviour
             rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
 
             b_jump = false;
+        }
+
+        // 小ジャンプ
+        if (b_smallJump)
+        {
+            rb.AddForce(Vector3.up * smallJumpPower, ForceMode.Impulse);
+
+            b_smallJump = false;
         }
 
         // 上昇中

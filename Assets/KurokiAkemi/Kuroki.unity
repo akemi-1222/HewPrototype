@@ -282,7 +282,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
   moveSpeed: 6
   keyMoveSpeed: 8.5
-  jumpPower: 10
+  jumpPower: 15
+  smallJumpPower: 5
   jumpGravity: 20
   fallPower: 10
   player: {fileID: 667408624}
