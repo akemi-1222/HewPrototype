@@ -1,48 +1,66 @@
 using UnityEngine;
 
-public class fruits : MonoBehaviour
+public class fruit : MonoBehaviour
 {
     [SerializeField] private GameObject player;
-    
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Update()
+    // プレイヤーの体を表すColliderをInspectorで設定する
+    [SerializeField] private Collider playerBody;
+
+    private Collider fruitBody;
+    private bool consumed;
+
+    private void Awake()
     {
-        
+        fruitBody = GetComponent<Collider>();
     }
+
     private void OnTriggerEnter(Collider other)
     {
-
-        //Destroy(collision.gameObject);
-        if(other.gameObject==player||
-            other.transform.IsChildOf(player.transform))
-       {
-            Destroy(this.gameObject);
-        }
-        
-
-        Debug.Log("ぶつかる相手:" + other.gameObject.name);
+        TryEat(other);
     }
-    //public class PlayerMove : MonoBehaviour
-    // {
 
-    //    // Update is called once per frame
-    //    void Update()
-    //    {
-    //        //キー入力を取得
-    //        float x = Input.GetAxisRaw("Horizontal");
-    //        float y= Input.GetAxisRaw("Vertical");
+    private void OnTriggerStay(Collider other)
+    {
+        // 触れている最中にプレイヤーが成長した場合も判定する
+        TryEat(other);
+    }
 
-    //        //移動方向を作る
-    //        Vector3 move =new Vector3(x,0f,y).normalized;
+    private void TryEat(Collider other)
+    {
+        if (consumed || player == null ||
+            playerBody == null || fruitBody == null)
+        {
+            return;
+        }
 
-    //        //プレイヤーを移動
-    //        transform.position += move*moveSpeed*Time.deltaTime;
-    //    }
-    //}
-   // public class ItemPickup :MonoBehaviour
-    //{
-        //アイテムに触れた瞬間に実行する
-        
-    //}
+        if (other.gameObject != player &&
+            !other.transform.IsChildOf(player.transform))
+        {
+            return;
+        }
+
+        float playerSize = GetSize(playerBody);
+        float fruitSize = GetSize(fruitBody);
+
+        // 同じ大きさ以下なら、まだ食べられない
+        if (playerSize <= fruitSize)
+            return;
+
+        PlayerSize playerSizeComponent = player.GetComponent<PlayerSize>();
+        if (playerSizeComponent == null)
+            return;
+
+        consumed = true;
+        playerSizeComponent.AddEatPoint();
+        Destroy(gameObject);
+    }
+
+    private static float GetSize(Collider body)
+    {
+        Vector3 size = body.bounds.size;
+
+        // 幅・高さ・奥行きのうち、一番長い辺を大きさとして扱う
+        return Mathf.Max(size.x, Mathf.Max(size.y, size.z));
+    }
 }

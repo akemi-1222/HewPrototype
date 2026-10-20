@@ -1,54 +1,52 @@
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.InputSystem;
-
-//int g_currentLevel;  //今のレベル
-//int g_pastLevel;     //1f前のレベル
-//int g_eatPoint;      //食べたもののポイント
 
 public class PlayerSize : MonoBehaviour
 {
-    public int g_currentLevel;  //今のレベル
-    public int g_pastLevel;     //1f前のレベル
-    public int g_eatPoint;      //食べたもののポイント
+    [SerializeField] private Transform ground;
 
-    void Start()
+    // プレイヤーの拡大率1あたり、Groundを何メートル下げるか
+    [SerializeField] private float groundDropPerScale = 1f;
+
+    public int g_currentLevel;
+    public int g_pastLevel;
+    public int g_eatPoint;
+
+    void Awake()
     {
         g_currentLevel = 1;
         g_pastLevel = g_currentLevel;
         g_eatPoint = 0;
     }
 
-    void Update()
+    public void AddEatPoint()
     {
-        int i;
-        i = g_currentLevel;
-        if (Keyboard.current != null &&
-            Keyboard.current.upArrowKey.wasPressedThisFrame)
-        {
-            g_eatPoint += 1;
-        }
+        g_eatPoint++;
 
-        if ( g_eatPoint == i * 2 - 1/*レベルが1でeatPointが1の時はレベルを2に。レベルが2でeatPointが3の時はレベルを3に。レベルが3でeatPointが5になったらレベルを4に...がずっと続く。奇数とiを上手く使うとすっきりしたコードにできるはず。。。*/)
+        // Each level requires 1, 3, 5, ... points respectively.
+        if (g_eatPoint >= g_currentLevel * 2 - 1)
         {
-            //レベルをUPさせる処理
             g_currentLevel++;
-
-
-            //eatPointをリセットさせる処理
             g_eatPoint = 0;
-
-        }
-        if(g_pastLevel != g_currentLevel)
             Grow();
+        }
     }
-    // Playerのサイズ変更
+
+    // Scale the player when its level changes.
     public void Grow()
     {
-        // プレイヤーのサイズを1.2倍に
+        float previousScale = transform.localScale.y;
+
         transform.localScale *= 1.2f;
 
-        // 現在のレベルの保存
+        float scaleIncrease = transform.localScale.y - previousScale;
+
+        if (ground != null)
+        {
+            ground.position += Vector3.down
+                * scaleIncrease
+                * groundDropPerScale;
+        }
+
         g_pastLevel = g_currentLevel;
     }
 }
