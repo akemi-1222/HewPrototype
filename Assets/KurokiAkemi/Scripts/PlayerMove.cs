@@ -18,10 +18,12 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private float jumpGravity = 15.0f;
     [SerializeField] private float fallPower = 25.0f;
 
-    [SerializeField] private Transform player;
-
     // キャラクターモデルの向きの補正
     [SerializeField] private float playerAngleOffset = 90.0f;
+
+    [SerializeField] private Transform player;
+
+    [SerializeField] private Transform cameraTransform;
 
     Rigidbody rb;
 
@@ -42,92 +44,105 @@ public class PlayerMove : MonoBehaviour
 
     // Update is called once per frame
     void Update()
+{
+    Vector2 moveInput = Vector2.zero;
+    bool usingStick = false;
+
+    // キーボード入力
+    
+        Keyboard keyboard = Keyboard.current;
+
+        moveInput.x =
+            (keyboard.dKey.isPressed ? 1f : 0f) -
+            (keyboard.aKey.isPressed ? 1f : 0f);
+
+        moveInput.y =
+            (keyboard.wKey.isPressed ? 1f : 0f) -
+            (keyboard.sKey.isPressed ? 1f : 0f);
+
+        if (keyboard.spaceKey.wasPressedThisFrame)
+            b_jump = true;
+
+        if (keyboard.jKey.wasPressedThisFrame)
+            b_smallJump = true;
+    
+
+    // コントローラー入力
+    
+        Gamepad gamepad = Gamepad.current;
+        Vector2 stick = gamepad.leftStick.ReadValue();
+
+        if (stick.magnitude > 0.1f)
+        {
+            moveInput = stick;
+            usingStick = true;
+        }
+
+        // 右側ボタン：通常ジャンプ
+        if (gamepad.buttonEast.wasPressedThisFrame)
+            b_jump = true;
+
+        // 下側ボタン：小ジャンプ
+        if (gamepad.buttonSouth.wasPressedThisFrame)
+            b_smallJump = true;
+    
+
+    // 斜め入力でも速度が大きくなりすぎないようにする
+    moveInput = Vector2.ClampMagnitude(moveInput, 1f);
+
+    // カメラの前方を地面に沿った方向へ変換する
+    Vector3 forward = Vector3.forward;
+
+    if (cameraTransform != null)
     {
-        // キーボード
-        if (Keyboard.current != null)
+        forward = Vector3.ProjectOnPlane(
+            cameraTransform.forward,
+            Vector3.up
+        );
+
+        // カメラがほぼ真下を向いている場合の補助
+        if (forward.sqrMagnitude < 0.001f)
         {
-            // 最後に押したキーの方向を保存
-            if (Keyboard.current.wKey.wasPressedThisFrame)
-                moveDirection = Vector3.forward;
-
-            if (Keyboard.current.sKey.wasPressedThisFrame)
-                moveDirection = Vector3.back;
-
-            if (Keyboard.current.dKey.wasPressedThisFrame)
-                moveDirection = Vector3.right;
-
-            if (Keyboard.current.aKey.wasPressedThisFrame)
-                moveDirection = Vector3.left;
-
-
-            // 移動キーを押している間は速度を変更
-            if (Keyboard.current.wKey.isPressed ||
-                Keyboard.current.sKey.isPressed ||
-                Keyboard.current.dKey.isPressed ||
-                Keyboard.current.aKey.isPressed)
-            {
-                f_currentSpeed = keyMoveSpeed;
-            }
-            else
-            {
-                f_currentSpeed = moveSpeed;
-            }
-
-
-            // Spaceでジャンプ
-            if (Keyboard.current.spaceKey.wasPressedThisFrame)
-                b_jump = true;
-
-            // Jで小ジャンプ
-            if (Keyboard.current.jKey.wasPressedThisFrame)
-                b_smallJump = true;
+            forward = Vector3.ProjectOnPlane(
+                cameraTransform.up,
+                Vector3.up
+            );
         }
 
-
-        // コントローラー
-        if (Gamepad.current != null)
-        {
-            Vector2 stick = Gamepad.current.leftStick.ReadValue();
-
-            // Lスティックを倒している
-            if (stick.magnitude > 0.1f)
-            {
-                // スティックの方向を3Dの方向に変換
-                moveDirection = new Vector3(stick.x, 0, stick.y).normalized;
-
-                // 通常速度の1.3倍
-                f_currentSpeed = moveSpeed * stickSpeedRate;
-            }
-
-
-            // ○ボタン
-            if (Gamepad.current.buttonEast.wasPressedThisFrame)
-            {
-                // ジャンプ
-                b_jump = true;
-
-                // バクつく
-                b_smallJump = true;
-            }
-
-
-            // ×ボタン
-            if (Gamepad.current.buttonSouth.wasPressedThisFrame)
-            {
-                // バクつく
-                b_smallJump = true;
-            }
-        }
-
-
-        // キャラクターの向き
-
-        if (moveDirection != Vector3.zero)
-        {
-            player.forward = moveDirection;
-            player.Rotate(0, playerAngleOffset, 0);
-        }
+        forward.Normalize();
     }
+
+    Vector3 right = Vector3.Cross(Vector3.up, forward);
+
+        if (moveInput.sqrMagnitude > 0.01f)
+        {
+            moveDirection = (
+                forward * moveInput.y +
+                right * moveInput.x
+            ).normalized;
+
+            f_currentSpeed = usingStick
+                ? moveSpeed * stickSpeedRate
+                : keyMoveSpeed;
+        }
+
+        // 入力があるときだけ、移動先へ向きを変える
+        if (player != null && moveDirection.sqrMagnitude > 0.001f)
+    {
+        Quaternion targetRotation =
+            Quaternion.LookRotation(
+                moveDirection.normalized,
+                Vector3.up
+            ) *
+            Quaternion.Euler(0f, playerAngleOffset, 0f);
+
+        player.rotation = Quaternion.RotateTowards(
+            player.rotation,
+            targetRotation,
+            720f * Time.deltaTime
+        );
+    }
+}
 
     void FixedUpdate()
     {

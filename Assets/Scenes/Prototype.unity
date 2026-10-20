@@ -270,9 +270,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TPSCamera
   target: {fileID: 902032135}
-  cameraDistance: 5
+  cameraDistance: 13
   cameraHeight: 2
-  mouthSensitivity: 0.15
+  mouthSensitivityX: 0.75
+  mouthSensitivityY: 0.15
+  controllerSensitivityX: 0.15
+  controllerSensitivityY: 0.3
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -412,8 +415,8 @@ GameObject:
   - component: {fileID: 490451625}
   - component: {fileID: 490451624}
   - component: {fileID: 490451623}
-  m_Layer: 0
-  m_Name: Cube
+  m_Layer: 3
+  m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -579,7 +582,7 @@ GameObject:
   - component: {fileID: 932459118}
   - component: {fileID: 932459117}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: Cream
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -730,6 +733,22 @@ PrefabInstance:
     - target: {fileID: 5096603777154217637, guid: 9b0724b7a4ef1fd4dafc2f0dcd2a40ba, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5722265534973202617, guid: 9b0724b7a4ef1fd4dafc2f0dcd2a40ba, type: 3}
+      propertyPath: groundCheck
+      value: 
+      objectReference: {fileID: 490451626}
+    - target: {fileID: 5722265534973202617, guid: 9b0724b7a4ef1fd4dafc2f0dcd2a40ba, type: 3}
+      propertyPath: cameraTransform
+      value: 
+      objectReference: {fileID: 330585546}
+    - target: {fileID: 5722265534973202617, guid: 9b0724b7a4ef1fd4dafc2f0dcd2a40ba, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6195997593939659838, guid: 9b0724b7a4ef1fd4dafc2f0dcd2a40ba, type: 3}
+      propertyPath: m_Constraints
+      value: 112
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
