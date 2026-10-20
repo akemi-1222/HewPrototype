@@ -2,27 +2,43 @@ using UnityEngine;
 
 public class Spown : MonoBehaviour
 {
-    [SerializeField]
-    public GameObject SpawnObject;
+    [SerializeField] public GameObject SpawnObject;
+    [SerializeField, Min(0.1f)] private float spawnInterval = 5f;
+    [SerializeField, Min(0f)] private float spawnedLifetime = 30f;
+    [SerializeField] private Transform passThroughRoot;
 
-    float TimeCount;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private float timeCount;
+
+    private void Start()
     {
-        
+        if (passThroughRoot == null)
+            return;
+
+        // Keep the ramps solid for food, but let player bodies pass through.
+        Collider[] machineColliders = passThroughRoot.GetComponentsInChildren<Collider>(true);
+        foreach (PlayerSize player in FindObjectsByType<PlayerSize>(FindObjectsSortMode.None))
+        {
+            foreach (Collider body in player.GetComponentsInChildren<Collider>(true))
+            {
+                foreach (Collider machine in machineColliders)
+                    Physics.IgnoreCollision(body, machine);
+            }
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        //タイマー機能
-        TimeCount += Time.deltaTime;
-        //5秒ごとに生成
-        if (TimeCount > 5)
-        {
-            //設定した場所にEnemyを回転0で出す
-            Instantiate(SpawnObject, transform.position, Quaternion.identity);
-            TimeCount = 0;//カウントを0に戻す
-        }
+        if (SpawnObject == null)
+            return;
+
+        timeCount += Time.deltaTime;
+        if (timeCount < Mathf.Max(0.1f, spawnInterval))
+            return;
+
+        timeCount = 0f;
+        GameObject spawned = Instantiate(SpawnObject, transform.position, Quaternion.identity);
+        // Remove food that misses the collection box instead of accumulating forever.
+        if (spawnedLifetime > 0f)
+            Destroy(spawned, spawnedLifetime);
     }
 }

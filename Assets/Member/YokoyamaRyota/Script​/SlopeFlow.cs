@@ -2,23 +2,18 @@ using UnityEngine;
 
 public class SlopeFlow : MonoBehaviour
 {
-    [SerializeField]
-    // ó¨Ç∑ï˚å¸
-    public Vector3 flowDirection = new Vector3(1, 0, 0);
-    [SerializeField]
-    // ó¨ÇÍÇÈã≠Ç≥
-    public float flowForce = 5.0f;
+    // Direction relative to the ramp, so rotating the machine also rotates its flow.
+    [SerializeField] public Vector3 flowDirection = new Vector3(1, 0, 0);
+    [SerializeField] public float flowForce = 5.0f;
 
-    // ÉXÉçÅ[ÉvÇ…êGÇÍÇƒÇ¢ÇÈä‘ääÇÈ
     private void OnCollisionStay(Collision collision)
     {
-        Rigidbody rb = collision.rigidbody;
+        Rigidbody body = collision.rigidbody;
+        if (body == null || body.isKinematic ||
+            body.GetComponentInParent<PlayerSize>() != null)
+            return;
 
-        if (rb != null)
-        {
-            rb.AddForce(
-                flowDirection.normalized * flowForce
-                );
-        }
+        Vector3 worldDirection = transform.TransformDirection(flowDirection).normalized;
+        body.AddForce(worldDirection * flowForce);
     }
 }

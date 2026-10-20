@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3608111343927297592}
   - component: {fileID: 9200233848772392760}
   - component: {fileID: 7744978396329540482}
+  - component: {fileID: 8760000000000000001}
   m_Layer: 0
   m_Name: flowNoodle
   m_TagString: Untagged
@@ -31,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.31241617, y: 0.22069678, z: 0.31686}
-  m_LocalScale: {x: 0.6999302, y: 0.3825893, z: 0.6999302}
+  m_LocalScale: {x: 2, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -162,3 +163,17 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.9062274, y: 0.9580694, z: 1.0072831}
   m_Center: {x: 0.008293025, y: 0.025224095, z: -0.029328816}
+--- !u!114 &8760000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7232718981754816189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f959695f4e723c44be736269d8fd337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::fruit
+  player: {fileID: 0}
+  playerBody: {fileID: 0}

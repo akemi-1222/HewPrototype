@@ -4,7 +4,11 @@ public class DeleteBox : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        // ” ‚É“–‚½‚Á‚½‘Šè‚ğíœ
-        Destroy(other.gameObject);
+        if (other.GetComponentInParent<PlayerSize>() != null)
+            return;
+
+        fruit food = other.GetComponentInParent<fruit>();
+        if (food != null)
+            Destroy(food.gameObject);
     }
 }

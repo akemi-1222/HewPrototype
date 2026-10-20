@@ -4,7 +4,7 @@ public class fruit : MonoBehaviour
 {
     [SerializeField] private GameObject player;
 
-    // プレイヤーの体を表すColliderをInspectorで設定する
+    // Optional player body reference for scene food.
     [SerializeField] private Collider playerBody;
 
     private Collider fruitBody;
@@ -12,7 +12,15 @@ public class fruit : MonoBehaviour
 
     private void Awake()
     {
-        fruitBody = GetComponent<Collider>();
+        foreach (Collider body in GetComponents<Collider>())
+        {
+            if (!body.enabled)
+                continue;
+
+            fruitBody = body;
+            if (!body.isTrigger)
+                break;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -22,33 +30,40 @@ public class fruit : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        // 触れている最中にプレイヤーが成長した場合も判定する
+        // Recheck when the player grows while touching the food.
         TryEat(other);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        TryEat(collision.collider);
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        TryEat(collision.collider);
     }
 
     private void TryEat(Collider other)
     {
-        if (consumed || player == null ||
-            playerBody == null || fruitBody == null)
-        {
-            return;
-        }
-
-        if (other.gameObject != player &&
-            !other.transform.IsChildOf(player.transform))
-        {
-            return;
-        }
-
-        float playerSize = GetSize(playerBody);
-        float fruitSize = GetSize(fruitBody);
-
-        // 同じ大きさ以下なら、まだ食べられない
-        if (playerSize <= fruitSize)
+        if (consumed || fruitBody == null)
             return;
 
-        PlayerSize playerSizeComponent = player.GetComponent<PlayerSize>();
+        // Spawned prefabs cannot hold references to scene objects.
+        PlayerSize playerSizeComponent = other.GetComponentInParent<PlayerSize>();
         if (playerSizeComponent == null)
+            return;
+
+        if (player != null && playerSizeComponent.gameObject != player)
+            return;
+
+        Collider body = playerBody;
+        if (body == null)
+            body = playerSizeComponent.GetComponent<Collider>();
+        if (body == null)
+            body = other;
+
+        if (GetSize(body) <= GetSize(fruitBody))
             return;
 
         consumed = true;
@@ -60,7 +75,7 @@ public class fruit : MonoBehaviour
     {
         Vector3 size = body.bounds.size;
 
-        // 幅・高さ・奥行きのうち、一番長い辺を大きさとして扱う
+        // Compare the longest side of the collider bounds.
         return Mathf.Max(size.x, Mathf.Max(size.y, size.z));
     }
 }
