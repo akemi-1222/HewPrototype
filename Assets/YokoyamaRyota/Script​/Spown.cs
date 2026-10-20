@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Spown : MonoBehaviour
 {
+    [SerializeField]
     public GameObject SpawnObject;
 
     float TimeCount;

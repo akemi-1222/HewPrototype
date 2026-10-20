@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 9200233848772392760}
   - component: {fileID: 7744978396329540482}
   m_Layer: 0
-  m_Name: flow
+  m_Name: flowNoodle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 7232718981754816189}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.31686, y: 0.2218, z: 0.31686}
+  m_LocalPosition: {x: 0.31241617, y: 0.22069678, z: 0.31686}
   m_LocalScale: {x: 0.6999302, y: 0.3825893, z: 0.6999302}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -110,7 +110,7 @@ SphereCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Radius: 0.28357235
   m_Center: {x: 0, y: -0.030886695, z: 0}
@@ -158,7 +158,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.99999994, y: 1, z: 0.99999994}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0.9062274, y: 0.9580694, z: 1.0072831}
+  m_Center: {x: 0.008293025, y: 0.025224095, z: -0.029328816}
