@@ -9,7 +9,10 @@ public class TPSCamera : MonoBehaviour
     [Header("カメラ設定")]
     [SerializeField] private float cameraDistance = 5.0f; // カメラと対象の距離
     [SerializeField] private float cameraHeight = 2.0f; // カメラの高さ
-    [SerializeField] private float mouthSensitivity = 0.15f; // マウス感度
+    [SerializeField] private float mouthSensitivityX = 0.75f; // 縦のマウス感度
+    [SerializeField] private float mouthSensitivityY = 0.15f; // 横のマウス感度
+    [SerializeField] private float controllerSensitivityX = 0.15f; // 縦のコントローラー感度
+    [SerializeField] private float controllerSensitivityY = 0.3f; // 横のコントローラー感度
 
     Vector3 m_angles;
 
@@ -35,14 +38,32 @@ public class TPSCamera : MonoBehaviour
     void Update()
     {
 
-        //マウスの移動量を取得
-        Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+        //マウスと右スティックの入力を取得
+        Vector2 cameraInput = Vector2.zero;
+
+        //マウスの入力を取得
+        if(Mouse.current != null)
+        {
+            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+            cameraInput.x += mouseDelta.x * mouthSensitivityX;
+            cameraInput.y += mouseDelta.y * mouthSensitivityY;
+
+        }
+
+        //コントローラーの右スティックの入力を取得
+        if (Gamepad.current != null)
+        {
+            Vector2 stickInput = Gamepad.current.rightStick.ReadValue();
+
+           cameraInput.x += stickInput.x * mouthSensitivityX;
+           cameraInput.y += stickInput.y * mouthSensitivityY;
+        }
 
         //マウスの左右移動でのカメラを横回転
-        m_rotationX += mouseDelta.x * mouthSensitivity;
+        m_rotationX += cameraInput.x;
 
         //マウスの上下移動でのカメラを縦回転
-        m_rotationY -= mouseDelta.y * mouthSensitivity;
+        m_rotationY -= cameraInput.y;
 
         //カメラの縦回転の角度制限
         m_rotationY = Mathf.Clamp(m_rotationY, -30f, 60f);

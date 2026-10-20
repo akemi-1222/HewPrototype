@@ -9,16 +9,26 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private float moveSpeed = 3.0f;
     [SerializeField] private float keyMoveSpeed = 4.0f;  // キー押されている時のスピード
 
+    // Lスティック操作時の速度倍率
+    [SerializeField] private float stickSpeedRate = 1.3f;
+
     [Header("ジャンプ力")]
     [SerializeField] private float jumpPower = 5.0f;
     [SerializeField] private float smallJumpPower = 2.5f;
     [SerializeField] private float jumpGravity = 15.0f;
     [SerializeField] private float fallPower = 25.0f;
 
-    [SerializeField] private Transform player;
+    [Header("地面判定")]
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.15f;
+    [SerializeField] private LayerMask groundLayer;
 
     // キャラクターモデルの向きの補正
     [SerializeField] private float playerAngleOffset = 90.0f;
+
+    [SerializeField] private Transform player;
+
+    [SerializeField] private Transform cameraTransform;
 
     Rigidbody rb;
 
@@ -33,84 +43,140 @@ public class PlayerMove : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        f_currentSpeed = moveSpeed;
     }
 
     // Update is called once per frame
     void Update()
-    {
-        // 最後に押したキーの方向を保存
-        if (Keyboard.current.wKey.wasPressedThisFrame)
-        {
-            moveDirection = Vector3.forward;
-        }
+{
+    Vector2 moveInput = Vector2.zero;
+    bool usingStick = false;
 
-        if (Keyboard.current.sKey.wasPressedThisFrame)
-        {
-            moveDirection = Vector3.back;
-        }
+    // キーボード入力
+    
+        Keyboard keyboard = Keyboard.current;
 
-        if (Keyboard.current.dKey.wasPressedThisFrame)
-        {
-            moveDirection = Vector3.right;
-        }
+        moveInput.x =
+            (keyboard.dKey.isPressed ? 1f : 0f) -
+            (keyboard.aKey.isPressed ? 1f : 0f);
 
-        if (Keyboard.current.aKey.wasPressedThisFrame)
-        {
-            moveDirection = Vector3.left;
-        }
+        moveInput.y =
+            (keyboard.wKey.isPressed ? 1f : 0f) -
+            (keyboard.sKey.isPressed ? 1f : 0f);
 
-
-        // キャラクターを移動方向に向かせる
-        if (moveDirection != Vector3.zero)
-        {
-            player.forward = moveDirection;
-            player.Rotate(0, playerAngleOffset, 0);
-        }
-
-
-        // 移動キーを押している間は速度を変更
-        if (Keyboard.current.wKey.isPressed ||
-            Keyboard.current.sKey.isPressed ||
-            Keyboard.current.dKey.isPressed ||
-            Keyboard.current.aKey.isPressed)
-        {
-            f_currentSpeed = keyMoveSpeed;
-        }
-        else
-        {
-            f_currentSpeed = moveSpeed;
-        }
-
-
-        // ジャンプ入力
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (keyboard.spaceKey.wasPressedThisFrame)
             b_jump = true;
 
-        // 小ジャンプ
-        if (Keyboard.current.jKey.wasPressedThisFrame)
+        if (keyboard.jKey.wasPressedThisFrame)
             b_smallJump = true;
+    
+
+    // コントローラー入力
+    
+        Gamepad gamepad = Gamepad.current;
+        Vector2 stick = gamepad.leftStick.ReadValue();
+
+        if (stick.magnitude > 0.1f)
+        {
+            moveInput = stick;
+            usingStick = true;
+        }
+
+        // 右側ボタン：通常ジャンプ
+        if (gamepad.buttonEast.wasPressedThisFrame)
+            b_jump = true;
+
+        // 下側ボタン：小ジャンプ
+        if (gamepad.buttonSouth.wasPressedThisFrame)
+            b_smallJump = true;
+    
+
+    // 斜め入力でも速度が大きくなりすぎないようにする
+    moveInput = Vector2.ClampMagnitude(moveInput, 1f);
+
+    // カメラの前方を地面に沿った方向へ変換する
+    Vector3 forward = Vector3.forward;
+
+    if (cameraTransform != null)
+    {
+        forward = Vector3.ProjectOnPlane(
+            cameraTransform.forward,
+            Vector3.up
+        );
+
+        // カメラがほぼ真下を向いている場合の補助
+        if (forward.sqrMagnitude < 0.001f)
+        {
+            forward = Vector3.ProjectOnPlane(
+                cameraTransform.up,
+                Vector3.up
+            );
+        }
+
+        forward.Normalize();
     }
+
+    Vector3 right = Vector3.Cross(Vector3.up, forward);
+
+        // 入力があるときだけ方向を更新
+        if (moveInput.sqrMagnitude > 0.01f)
+        {
+            moveDirection = (
+                forward * moveInput.y +
+                right * moveInput.x
+            ).normalized;
+        }
+
+        // 速度は入力の有無に応じて毎フレーム更新
+        f_currentSpeed = usingStick
+            ? moveSpeed * stickSpeedRate
+            : moveSpeed;
+
+    // 入力があるときだけ、移動先へ向きを変える
+    if (player != null && moveDirection.sqrMagnitude > 0.001f)
+    {
+        Quaternion targetRotation =
+            Quaternion.LookRotation(
+                moveDirection,
+                Vector3.up
+            ) *
+            Quaternion.Euler(0f, playerAngleOffset, 0f);
+
+        player.rotation = Quaternion.RotateTowards(
+            player.rotation,
+            targetRotation,
+            720f * Time.deltaTime
+        );
+    }
+}
 
     void FixedUpdate()
     {
         // 移動
         rb.MovePosition(rb.position + moveDirection * f_currentSpeed * Time.fixedDeltaTime);
 
-        // ジャンプ
-        if (b_jump)
-        {
-            rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+        bool isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer, QueryTriggerInteraction.Ignore);
 
-            b_jump = false;
+        // 上昇中は、地面の近くでもジャンプさせない
+        bool canJump = isGrounded && rb.linearVelocity.y <= 0.01f;
+
+        if (canJump)
+        {
+            if (b_jump)
+            {
+                rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+            }
+            else if (b_smallJump)
+            {
+                rb.AddForce(Vector3.up * smallJumpPower, ForceMode.Impulse);
+            }
         }
 
-        // 小ジャンプ
-        if (b_smallJump)
-        {
-            rb.AddForce(Vector3.up * smallJumpPower, ForceMode.Impulse);
+        // 空中で押した入力を、着地まで残さない
+        b_jump = false;
+        b_smallJump = false;
 
-            b_smallJump = false;
-        }
 
         // 上昇中
         if (rb.linearVelocity.y > 0)
