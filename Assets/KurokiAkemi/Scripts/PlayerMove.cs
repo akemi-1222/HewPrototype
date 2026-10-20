@@ -18,6 +18,11 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private float jumpGravity = 15.0f;
     [SerializeField] private float fallPower = 25.0f;
 
+    [Header("地面判定")]
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.15f;
+    [SerializeField] private LayerMask groundLayer;
+
     // キャラクターモデルの向きの補正
     [SerializeField] private float playerAngleOffset = 90.0f;
 
@@ -149,21 +154,27 @@ public class PlayerMove : MonoBehaviour
         // 移動
         rb.MovePosition(rb.position + moveDirection * f_currentSpeed * Time.fixedDeltaTime);
 
-        // ジャンプ
-        if (b_jump)
-        {
-            rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+        bool isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer, QueryTriggerInteraction.Ignore);
 
-            b_jump = false;
+        // 上昇中は、地面の近くでもジャンプさせない
+        bool canJump = isGrounded && rb.linearVelocity.y <= 0.01f;
+
+        if (canJump)
+        {
+            if (b_jump)
+            {
+                rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+            }
+            else if (b_smallJump)
+            {
+                rb.AddForce(Vector3.up * smallJumpPower, ForceMode.Impulse);
+            }
         }
 
-        // 小ジャンプ
-        if (b_smallJump)
-        {
-            rb.AddForce(Vector3.up * smallJumpPower, ForceMode.Impulse);
+        // 空中で押した入力を、着地まで残さない
+        b_jump = false;
+        b_smallJump = false;
 
-            b_smallJump = false;
-        }
 
         // 上昇中
         if (rb.linearVelocity.y > 0)
