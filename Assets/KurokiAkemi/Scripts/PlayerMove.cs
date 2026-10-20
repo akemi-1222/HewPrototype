@@ -119,24 +119,26 @@ public class PlayerMove : MonoBehaviour
 
     Vector3 right = Vector3.Cross(Vector3.up, forward);
 
+        // 入力があるときだけ方向を更新
         if (moveInput.sqrMagnitude > 0.01f)
         {
             moveDirection = (
                 forward * moveInput.y +
                 right * moveInput.x
             ).normalized;
-
-            f_currentSpeed = usingStick
-                ? moveSpeed * stickSpeedRate
-                : keyMoveSpeed;
         }
 
-        // 入力があるときだけ、移動先へ向きを変える
-        if (player != null && moveDirection.sqrMagnitude > 0.001f)
+        // 速度は入力の有無に応じて毎フレーム更新
+        f_currentSpeed = usingStick
+            ? moveSpeed * stickSpeedRate
+            : moveSpeed;
+
+    // 入力があるときだけ、移動先へ向きを変える
+    if (player != null && moveDirection.sqrMagnitude > 0.001f)
     {
         Quaternion targetRotation =
             Quaternion.LookRotation(
-                moveDirection.normalized,
+                moveDirection,
                 Vector3.up
             ) *
             Quaternion.Euler(0f, playerAngleOffset, 0f);

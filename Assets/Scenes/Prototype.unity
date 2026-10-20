@@ -770,6 +770,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 987560736}
     - target: {fileID: 5722265534973202617, guid: 9b0724b7a4ef1fd4dafc2f0dcd2a40ba, type: 3}
+      propertyPath: stickSpeedRate
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5722265534973202617, guid: 9b0724b7a4ef1fd4dafc2f0dcd2a40ba, type: 3}
       propertyPath: cameraTransform
       value: 
       objectReference: {fileID: 330585546}
