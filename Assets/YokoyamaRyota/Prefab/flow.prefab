@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6920875146002761011}
   - component: {fileID: 3608111343927297592}
   - component: {fileID: 9200233848772392760}
+  - component: {fileID: 7744978396329540482}
   m_Layer: 0
   m_Name: flow
   m_TagString: Untagged
@@ -111,8 +112,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 0.28357235
+  m_Center: {x: 0, y: -0.030886695, z: 0}
 --- !u!54 &9200233848772392760
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -140,3 +141,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!65 &7744978396329540482
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7232718981754816189}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 0.99999994, y: 1, z: 0.99999994}
+  m_Center: {x: 0, y: 0, z: 0}
