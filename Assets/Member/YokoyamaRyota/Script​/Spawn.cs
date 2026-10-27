@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Spown : MonoBehaviour
+public class Spawn : MonoBehaviour
 {
     [SerializeField] public GameObject SpawnObject;
     [SerializeField, Min(0.1f)] private float spawnInterval = 5f;
