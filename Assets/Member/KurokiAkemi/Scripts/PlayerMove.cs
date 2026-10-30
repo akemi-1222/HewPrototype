@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.TextCore.Text;
@@ -17,6 +18,8 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private float smallJumpPower = 2.5f;
     [SerializeField] private float jumpGravity = 15.0f;
     [SerializeField] private float fallPower = 25.0f;
+    //private AudioSource audioSource;
+    //public AudioClip jumpSE; // Inspectorからアサインする
 
     [Header("地面判定")]
     [SerializeField] private Transform groundCheck;
@@ -45,6 +48,7 @@ public class PlayerMove : MonoBehaviour
         rb = GetComponent<Rigidbody>();
 
         f_currentSpeed = moveSpeed;
+       // audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -67,6 +71,7 @@ public class PlayerMove : MonoBehaviour
 
         if (keyboard.spaceKey.wasPressedThisFrame)
             b_jump = true;
+        //audioSource.PlayOneShot(jumpSE);
 
         if (keyboard.jKey.wasPressedThisFrame)
             b_smallJump = true;
@@ -86,6 +91,7 @@ public class PlayerMove : MonoBehaviour
         // 右側ボタン：通常ジャンプ
         if (gamepad.buttonEast.wasPressedThisFrame)
             b_jump = true;
+        //audioSource.PlayOneShot(jumpSE);
 
         // 下側ボタン：小ジャンプ
         if (gamepad.buttonSouth.wasPressedThisFrame)
@@ -166,10 +172,12 @@ public class PlayerMove : MonoBehaviour
             if (b_jump)
             {
                 rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+                //audioSource.PlayOneShot(jumpSE);
             }
             else if (b_smallJump)
             {
                 rb.AddForce(Vector3.up * smallJumpPower, ForceMode.Impulse);
+               // audioSource.PlayOneShot(jumpSE);
             }
         }
 
