@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Shak
+  - Ground
   layers:
   - Default
   - TransparentFX
