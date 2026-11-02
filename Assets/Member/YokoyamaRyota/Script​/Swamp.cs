@@ -1,15 +1,44 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 using static UnityEngine.LowLevelPhysics2D.PhysicsShape;
 
 public class Swamp : MonoBehaviour
 {
     [SerializeField]
-    private float sinkSpeed = 0.05f; // ’¾‚Þ‘¬“x
+    private float sinkSpeed = 1.0f; // ’¾‚Þ‘¬“x
     [SerializeField]
-    private float sinkDistance = 2.0f; // ’¾‚Þ‹——£
- 
+    private float sinkTime = 2.0f; // ’¾‚ÞŽžŠÔ
+
     private int contact = 0;
-    float distance = 0.0f;
+    private float timeElapsed = 0.0f;
+    private bool sink = false;
+    private Rigidbody rb;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        if (sink)
+        {
+            timeElapsed += Time.deltaTime;
+            float ratio = 1.0f - (timeElapsed / sinkTime);
+            float move = sinkSpeed * ratio * Time.deltaTime;
+
+            transform.position = new Vector3(
+                transform.position.x, 
+                transform.position.y - move, 
+                transform.position.z
+                );
+
+            if (timeElapsed >= sinkTime)
+            {
+                Destroy(gameObject);
+            }
+        }
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -19,22 +48,9 @@ public class Swamp : MonoBehaviour
 
             if (contact >= 3)
             {
-                Sink();
+                sink = true;
+                rb.isKinematic = true;
             }
         }
-    }
-
-    private void Sink()
-    {
-        while(distance < sinkDistance)
-        {
-            float move = distance + sinkSpeed;
-
-            transform.position = new Vector3(transform.position.x, transform.position.y - move, transform.position.z);
-
-            distance += move;
-        }
-
-        Destroy(gameObject);
     }
 }
