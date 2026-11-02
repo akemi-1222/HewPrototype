@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class fruit : MonoBehaviour
 {
@@ -7,17 +9,36 @@ public class fruit : MonoBehaviour
     // Optional player body reference for scene food.
     [SerializeField] private Collider playerBody;
 
+    [Header("êHÇ◊ÇÈâπ")]
+    [SerializeField] private AudioClip eatSound;
+    private AudioSource audioSource; // Å©í«â¡
+
+
     private Collider fruitBody;
     private bool consumed;
-
+    
     private void Awake()
     {
+        audioSource = GetComponent<AudioSource>();
+
         foreach (Collider body in GetComponents<Collider>())
         {
             if (!body.enabled)
                 continue;
 
             fruitBody = body;
+            if (!body.isTrigger)
+                break;
+        }
+       
+
+        foreach (Collider body in GetComponents<Collider>())
+        {
+            if (!body.enabled)
+                continue;
+
+            fruitBody = body;
+
             if (!body.isTrigger)
                 break;
         }
@@ -67,8 +88,22 @@ public class fruit : MonoBehaviour
             return;
 
         consumed = true;
+        // â ï®ÇêHÇ◊ÇÈâπ
+        if (eatSound != null)
+        {
+               
+                audioSource.PlayOneShot(eatSound);
+           
+        }
+        else
+        {
+            UnityEngine.Debug.LogError("Eat SoundÇ™ê›íËÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒÅI");
+        }
+
         playerSizeComponent.AddEatPoint();
-        Destroy(gameObject);
+
+        // â ï®Çè¡Ç∑
+        Destroy(gameObject,1f);
     }
 
     private static float GetSize(Collider body)

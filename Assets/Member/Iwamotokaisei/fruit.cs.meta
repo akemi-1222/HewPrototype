@@ -5,6 +5,9 @@ MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - player: {fileID: 1109877355868182578, guid: 9b0724b7a4ef1fd4dafc2f0dcd2a40ba, type: 3}
+  - playerBody: {instanceID: 0}
+  - eatSound: {fileID: 8300000, guid: cb378911cf85ca04599c8942706cbee9, type: 3}
+  - audioSource: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

@@ -13,13 +13,19 @@ public class PlayerMove : MonoBehaviour
     // Lスティック操作時の速度倍率
     [SerializeField] private float stickSpeedRate = 1.3f;
 
+    [Header("移動音")]
+    [SerializeField] private AudioSource moveAudioSource;
+    [SerializeField] AudioClip moveSE;
+
     [Header("ジャンプ力")]
     [SerializeField] private float jumpPower = 5.0f;
     [SerializeField] private float smallJumpPower = 2.5f;
     [SerializeField] private float jumpGravity = 15.0f;
     [SerializeField] private float fallPower = 25.0f;
-    //private AudioSource audioSource;
-    //public AudioClip jumpSE; // Inspectorからアサインする
+
+    [Header("ジャンプ音")]
+    [SerializeField] private AudioSource jumpAudioSource;
+    [SerializeField] AudioClip jumpSE;
 
     [Header("地面判定")]
     [SerializeField] private Transform groundCheck;
@@ -60,49 +66,73 @@ public class PlayerMove : MonoBehaviour
     // キーボード入力
     
         Keyboard keyboard = Keyboard.current;
-
-        moveInput.x =
+        if (keyboard != null)
+        {
+            moveInput.x =
             (keyboard.dKey.isPressed ? 1f : 0f) -
             (keyboard.aKey.isPressed ? 1f : 0f);
 
-        moveInput.y =
-            (keyboard.wKey.isPressed ? 1f : 0f) -
-            (keyboard.sKey.isPressed ? 1f : 0f);
+            moveInput.y =
+                (keyboard.wKey.isPressed ? 1f : 0f) -
+                (keyboard.sKey.isPressed ? 1f : 0f);
 
-        if (keyboard.spaceKey.wasPressedThisFrame)
-            b_jump = true;
-        //audioSource.PlayOneShot(jumpSE);
+            if (keyboard.spaceKey.wasPressedThisFrame)
+                b_jump = true;
+          
 
-        if (keyboard.jKey.wasPressedThisFrame)
-            b_smallJump = true;
-    
+            if (keyboard.jKey.wasPressedThisFrame)
+                b_smallJump = true;
 
-    // コントローラー入力
-    
+        }
+      
+       
+        // コントローラー入力
+
         Gamepad gamepad = Gamepad.current;
-        Vector2 stick = gamepad.leftStick.ReadValue();
-
-        if (stick.magnitude > 0.1f)
+        if (gamepad != null)
         {
-            moveInput = stick;
-            usingStick = true;
+            Vector2 stick = gamepad.leftStick.ReadValue();
+
+            if (stick.magnitude > 0.1f)
+            {
+                moveInput = stick;
+                usingStick = true;
+            }
+
+            // 右側ボタン：通常ジャンプ
+            if (gamepad.buttonEast.wasPressedThisFrame)
+                b_jump = true;
+
+
+            // 下側ボタン：小ジャンプ
+            if (gamepad.buttonSouth.wasPressedThisFrame)
+                b_smallJump = true;
         }
 
-        // 右側ボタン：通常ジャンプ
-        if (gamepad.buttonEast.wasPressedThisFrame)
-            b_jump = true;
-        //audioSource.PlayOneShot(jumpSE);
+        // 斜め入力でも速度が大きくなりすぎないようにする
+        moveInput = Vector2.ClampMagnitude(moveInput, 1f);
 
-        // 下側ボタン：小ジャンプ
-        if (gamepad.buttonSouth.wasPressedThisFrame)
-            b_smallJump = true;
-    
+        // 移動中だけ音を鳴らす
+        if (moveAudioSource != null)
+        {
+            if (moveInput.sqrMagnitude > 0.01f)
+            {
+                if (!moveAudioSource.isPlaying)
+                {
+                    moveAudioSource.Play();
+                }
+            }
+            else
+            {
+                if (moveAudioSource.isPlaying)
+                {
+                    moveAudioSource.Stop();
+                }
+            }
+        }
 
-    // 斜め入力でも速度が大きくなりすぎないようにする
-    moveInput = Vector2.ClampMagnitude(moveInput, 1f);
-
-    // カメラの前方を地面に沿った方向へ変換する
-    Vector3 forward = Vector3.forward;
+        // カメラの前方を地面に沿った方向へ変換する
+        Vector3 forward = Vector3.forward;
 
     if (cameraTransform != null)
     {
@@ -172,12 +202,21 @@ public class PlayerMove : MonoBehaviour
             if (b_jump)
             {
                 rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
-                //audioSource.PlayOneShot(jumpSE);
+         
+                if (jumpAudioSource != null && jumpSE != null)
+                {
+                    jumpAudioSource.PlayOneShot(jumpSE);
+                }
             }
+  
             else if (b_smallJump)
             {
                 rb.AddForce(Vector3.up * smallJumpPower, ForceMode.Impulse);
-               // audioSource.PlayOneShot(jumpSE);
+           
+                if (jumpAudioSource != null && jumpSE != null)
+                {
+                    jumpAudioSource.PlayOneShot(jumpSE);
+                }
             }
         }
 
